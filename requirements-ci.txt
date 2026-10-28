@@ -1,0 +1,10 @@
+# Minimal deps for CI and the offline demo. Excludes torch/transformers/trl —
+# the classifier falls back to the light tfidf backend, so CI stays fast while
+# still exercising real ML (sklearn). Add the heavy deps only for the
+# ModernBERT + real DPO/GRPO paths (see p1_agent_eval/requirements.txt).
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.5
+rich>=13.7
+pytest>=8.3
+pytest-asyncio>=0.24

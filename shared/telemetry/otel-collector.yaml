@@ -1,0 +1,41 @@
+# OpenTelemetry Collector config.
+# Receives OTLP spans from the agent SDK and (local path) writes them to a
+# JSONL file that the ingest worker tails into Kafka. In production you would
+# enable the `kafka` exporter block instead and delete the file exporter.
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 256
+
+exporters:
+  # LOCAL: dump spans to a file the Python ingest worker tails.
+  file:
+    path: /spans/spans.jsonl
+    rotation:
+      max_megabytes: 50
+      max_backups: 3
+
+  # PRODUCTION: send spans straight to Kafka. Uncomment and set brokers.
+  # kafka:
+  #   brokers: ["redpanda:9092"]
+  #   topic: agent.turns.raw
+  #   encoding: otlp_json
+
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [file, debug]      # add `kafka` here in prod

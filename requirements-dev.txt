@@ -1,0 +1,6 @@
+# Shared dev/test deps. Install once from repo root:
+#   .venv/bin/pip install -r requirements-dev.txt
+pytest>=8.3
+pytest-asyncio>=0.24
+ruff>=0.6
+rich>=13.7

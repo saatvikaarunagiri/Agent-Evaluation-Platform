@@ -1,0 +1,15 @@
+[project]
+name = "agent-eval"
+version = "0.1.0"
+description = "Closed-loop agent evaluation + RL — runnable on an M-series Mac."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["p1_agent_eval/tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

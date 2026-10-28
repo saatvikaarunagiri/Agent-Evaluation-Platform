@@ -1,0 +1,84 @@
+# =============================================================================
+# Agent Eval infra. Everything is behind a PROFILE so you only start what you
+# need. On a 16GB Mac, start one profile at a time.
+#
+#   docker compose --profile agent-eval up -d     # redpanda + clickhouse + otel
+#   docker compose --profile dash up -d           # grafana
+#   docker compose down                           # stop (keeps data)
+#   docker compose down -v                        # stop + delete volumes
+# =============================================================================
+name: agent-eval
+
+services:
+  # Redpanda — Kafka-API-compatible broker, ~350MB vs Kafka's ~2GB.
+  redpanda:
+    image: redpandadata/redpanda:v24.2.7
+    profiles: ["agent-eval"]
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=512M
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://localhost:9092
+    ports: ["9092:9092", "9644:9644"]
+    volumes: ["redpanda-data:/var/lib/redpanda/data"]
+
+  redpanda-console:
+    image: redpandadata/console:v2.7.2
+    profiles: ["agent-eval"]
+    depends_on: [redpanda]
+    ports: ["8080:8080"]
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+
+  # ClickHouse — columnar OLAP for high-cardinality telemetry (vs Postgres).
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    profiles: ["agent-eval"]
+    ports: ["8123:8123", "9000:9000"]
+    ulimits:
+      nofile: { soft: 262144, hard: 262144 }
+    environment:
+      CLICKHOUSE_DB: telemetry
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./infra/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # OpenTelemetry Collector — receives agent spans, writes a file the worker tails.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.109.0
+    profiles: ["agent-eval"]
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./shared/telemetry/otel-collector.yaml:/etc/otel/config.yaml:ro
+      - otel-spans:/spans
+    ports: ["4317:4317", "4318:4318"]
+
+  grafana:
+    image: grafana/grafana-oss:11.2.0
+    profiles: ["dash"]
+    ports: ["3001:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes: ["grafana-data:/var/lib/grafana"]
+
+volumes:
+  redpanda-data:
+  clickhouse-data:
+  grafana-data:
+  otel-spans:

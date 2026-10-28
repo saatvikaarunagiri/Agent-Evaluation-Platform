@@ -1,0 +1,27 @@
+# Project 1 — Agent Eval + RL
+# Install from repo root:  .venv/bin/pip install -r p1_agent_eval/requirements.txt
+
+# --- always needed (light) ---
+numpy>=1.26
+pandas>=2.2
+scikit-learn>=1.5
+clickhouse-connect>=0.8      # talk to ClickHouse over HTTP
+confluent-kafka>=2.5         # Kafka/Redpanda client (prebuilt wheels on macOS arm64)
+opentelemetry-sdk>=1.27
+opentelemetry-exporter-otlp>=1.27
+orjson>=3.10
+rich>=13.7                   # pretty CLI output
+tqdm>=4.66
+
+# --- classifier (heavier; needed for `make p1-train-clf`) ---
+# transformers 4.48+ ships ModernBERT. torch is the big one (~1GB).
+torch>=2.3
+transformers>=4.48
+datasets>=3.0
+onnx>=1.16
+onnxruntime>=1.19            # CPU/CoreML inference; swap to onnxruntime-gpu on CUDA
+accelerate>=0.34
+
+# --- post-training (DPO/GRPO; needed for `make p1-dpo` / `make p1-grpo`) ---
+trl>=0.11                    # DPO + GRPO trainers
+peft>=0.13                   # LoRA so it fits in 16GB

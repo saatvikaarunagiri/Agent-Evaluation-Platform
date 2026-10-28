@@ -1,0 +1,12 @@
+.venv/
+**/__pycache__/
+*.pyc
+.git/
+.github/
+**/.pytest_cache/
+**/data/curated/
+**/artifacts/
+*.jsonl
+.env
+ai-platforms.zip
+**/.DS_Store

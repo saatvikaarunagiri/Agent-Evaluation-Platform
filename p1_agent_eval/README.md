@@ -1,4 +1,4 @@
-# Project 1 — Closed-Loop Agent Evaluation & RL Platform
+# PClosed Loop Agent Evaluation & RL Platform
 
 A pipeline that watches an LLM agent in production, **scores every turn** with a
 cheap classifier (escalating only the genuinely ambiguous turns to an expensive
@@ -8,17 +8,17 @@ is the very same classifier. One source of truth for "was this a good turn,"
 reused for monitoring, guardrails, and RL reward.
 
 ```
- agent ──OTel spans──▶ collector ──▶ Kafka/Redpanda ──▶ ingest worker ──▶ ClickHouse
+ agent ──OTel spans -> collector -> Kafka/Redpanda ─> ingest worker ─> ClickHouse
                                                              │ scores each turn
                                                              ▼
-                                   ModernBERT classifier ──low confidence──▶ LLM judge
+                                   ModernBERT classifier - low confidence -> LLM judge
                                         (cheap, <90ms)                      (slow, accurate)
                                                              │ label + reward
                                                              ▼
-                                   curation ──▶ eval set · golden paths · DPO pairs
+                                   curation ─> eval set · golden paths · DPO pairs
                                                              │
                                                              ▼
-                                      DPO warm start ──────▶ online GRPO
+                                      DPO warm start.   ─>  online GRPO
                                       (prefer good traj.)    (reward = classifier)
 ```
 
@@ -30,8 +30,7 @@ reused for monitoring, guardrails, and RL reward.
 and expensive. But most turns are easy to grade — only a minority are genuinely
 ambiguous. So we train a small, fast classifier to handle the easy majority and
 **route only low-confidence turns to the LLM**. That single idea drives the cost
-down (the resume's ~92% online-eval cost cut) and gives us a reusable reward
-signal for RL.
+down and gives us a reusable reward signal for RL.
 
 **The pieces and the reasoning:**
 

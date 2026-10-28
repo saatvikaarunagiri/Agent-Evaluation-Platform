@@ -1,4 +1,4 @@
-# PClosed Loop Agent Evaluation & RL Platform
+# Closed Loop Agent Evaluation & RL Platform
 
 A pipeline that watches an LLM agent in production, **scores every turn** with a
 cheap classifier (escalating only the genuinely ambiguous turns to an expensive

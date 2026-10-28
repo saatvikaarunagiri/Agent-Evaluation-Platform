@@ -60,7 +60,7 @@ agent turns ─> classifier (only if unsure) ─> LLM judge
 ## Good to know
 
 - **Free by default** — a tiny classifier + local tools. Plug in an API key only if you want a hosted LLM judge.
-- **🪆 Nothing is required** — no torch? no Docker? no internet? It falls back to a lighter path and still runs the whole loop.
-- **🧪 Numbers are real but synthetic** — the demo *measures* its scores on generated logs. Point it at your real agent telemetry (the guide shows where) for your real numbers.
+- **Nothing is required** — no torch? no Docker? no internet? It falls back to a lighter path and still runs the whole loop.
+- **Numbers are real but synthetic** — the demo *measures* its scores on generated logs. Point it at your real agent telemetry (the guide shows where) for your real numbers.
 
 <sub>Built to run on an M-series MacBook · MIT licensed · `make help` for the full menu</sub>
